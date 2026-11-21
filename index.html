@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>WasteWise – Sort it right</title>
+<style>
+:root{--bg:#eef5ef;--card:#ffffff;--ink:#17261d;--mut:#617268;--acc:#2f9e5e;--acc2:#1f7a8c;--accT:#fff;--line:#d9e6dc;--sh:0 6px 20px rgba(30,80,50,.10);--c:#2f9e5e;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1612;--card:#17231c;--ink:#e9f2ec;--mut:#9bb0a3;--acc:#4fcf88;--acc2:#4cb7cc;--accT:#07140d;--line:#27382d;--sh:0 6px 20px rgba(0,0,0,.35)}}
+:root[data-theme="dark"]{--bg:#0e1612;--card:#17231c;--ink:#e9f2ec;--mut:#9bb0a3;--acc:#4fcf88;--acc2:#4cb7cc;--accT:#07140d;--line:#27382d;--sh:0 6px 20px rgba(0,0,0,.35)}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 "Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.hero{background:linear-gradient(135deg,var(--acc) 0%,var(--acc2) 100%);color:var(--accT);padding:28px 20px 56px;border-radius:0 0 28px 28px}
+.hero h1{margin:0;font-size:26px;letter-spacing:-.3px}.hero p{margin:4px 0 0;opacity:.9}
+main{max-width:640px;margin:-36px auto 0;padding:0 16px 96px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin:0 0 14px;box-shadow:var(--sh)}
+h2{font-size:17px;margin:0 0 8px}.mut{color:var(--mut);font-size:14px}
+button,.btn{font:inherit;background:var(--acc);color:var(--accT);border:0;border-radius:12px;padding:11px 16px;font-weight:600;cursor:pointer;min-height:44px;transition:transform .1s}
+button:active{transform:scale(.97)}button.g{background:transparent;color:var(--acc);border:1.5px solid var(--acc)}button:disabled{opacity:.5}
+input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px;min-height:44px;width:100%}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1 1 140px}
+nav{position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom,0px));max-width:616px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--sh);display:flex;padding:4px}
+nav button{flex:1;background:none;color:var(--mut);border-radius:16px;font-size:12px;padding:8px 2px;min-height:50px}
+nav button[aria-selected="true"]{background:var(--acc);color:var(--accT)}nav span{display:block;font-size:19px;line-height:1.1}
+.drop{display:block;border:2px dashed var(--acc);border-radius:16px;padding:26px 12px;text-align:center;cursor:pointer;color:var(--acc);font-weight:600;background:color-mix(in srgb,var(--acc) 6%,transparent)}
+.drop input{display:none}.drop b{display:block;font-size:34px}
+.pvw{position:relative;display:none;margin-top:12px;border-radius:16px;overflow:hidden}.pvw img{width:100%;max-height:280px;object-fit:cover;display:block}
+.pvw.scan::after{content:"";position:absolute;left:0;right:0;height:5px;background:linear-gradient(90deg,transparent,var(--acc),transparent);box-shadow:0 0 16px var(--acc);animation:sc 1.4s ease-in-out infinite alternate}
+@keyframes sc{from{top:0}to{top:calc(100% - 5px)}}
+.chip{display:inline-block;padding:4px 11px;border-radius:99px;font-size:13px;font-weight:700;background:var(--c);color:#fff;margin:2px 4px 2px 0}
+.res{border-top:5px solid var(--c)}.big{font-size:44px;line-height:1}
+.chips button{background:var(--bg);color:var(--ink);border:1px solid var(--line);padding:8px 12px;min-height:40px;margin:0 6px 6px 0;border-radius:99px}
+.chips button.on{background:var(--c);color:#fff;border-color:var(--c)}
+ol,ul{padding-left:20px;margin:6px 0}li{margin:4px 0}
+.today{background:linear-gradient(135deg,var(--acc),var(--acc2));color:var(--accT);border:0}.today .mut{color:inherit;opacity:.85}
+.day{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}.day:last-child{border:0}
+.dt{min-width:52px;text-align:center;background:var(--bg);border-radius:12px;padding:6px 4px;font-weight:700}.dt small{display:block;font-weight:500;color:var(--mut)}
+.hide{display:none}a{color:var(--acc)}
+</style></head><body>
+<div class="hero"><h1>♻️ WasteWise</h1><p>Snap it, sort it, dispose of it right.</p></div>
+<main>
+<section id="t-scan">
+ <div class="card"><h2>Upload a photo of your trash</h2>
+  <label class="drop"><b>📷</b>Tap to take or upload a photo<input type="file" id="f" accept="image/*"></label>
+  <div class="pvw" id="pw"><img id="pv" alt="Your photo"></div>
+  <p class="mut" id="st">We identify it automatically. Photos are resized on your device and never saved.</p></div>
+ <div id="res"></div>
+ <div class="card"><h2>Not right? Pick a category</h2><div class="chips" id="cats"></div></div>
+</section>
+
+<section id="t-sched" class="hide">
+ <div class="card today" id="today"></div>
+ <div class="card"><h2>Next 7 days</h2><div id="week"></div>
+  <p class="mut" id="src"></p></div>
+ <div class="card"><h2>Your area</h2>
+  <div class="row"><input id="brgy" placeholder="Barangay (e.g. your barangay name)"><button id="sync" class="g">Sync schedule</button></div>
+  <p class="mut" id="sm">Default is the Quezon City citywide schedule. Barangays may set their own, so edit below to match your barangay notice.</p>
+  <div class="row"><select id="sd"></select><select id="sty"></select><button id="sadd">Add</button></div>
+  <div id="slist" style="margin-top:8px"></div>
+  <div class="row" style="margin-top:8px"><button class="g" id="reset">Reset to QC default</button></div></div>
+</section>
+
+<section id="t-shops" class="hide">
+ <div class="card"><h2>Junk shops &amp; drop-offs</h2>
+  <p class="mut">Save buyers and donation points for recyclables and e-waste.</p>
+  <div class="row"><a class="btn" id="maps" target="_blank" rel="noopener" style="text-align:center;text-decoration:none">🔎 Find nearby on Maps</a></div></div>
+ <div class="card"><h2>Add a shop</h2>
+  <div class="row"><input id="sn" placeholder="Shop name"><input id="sa" placeholder="Address"></div>
+  <div class="row" style="margin-top:8px"><input id="sp" placeholder="Phone" inputmode="tel"><select id="sc"></select></div>
+  <div class="row" style="margin-top:8px"><button id="shadd">Save shop</button></div></div>
+ <div class="row" style="margin-bottom:10px"><select id="sfil"></select></div>
+ <div id="shlist"></div>
+</section>
+
+<section id="t-about" class="hide">
+ <div class="card"><h2>About &amp; privacy</h2>
+  <ul><li>Photos are downscaled in your browser, sent only to the recognizer, and never stored.</li>
+  <li>Schedule and shop entries stay on this device; no account needed.</li>
+  <li>Guidance follows RA 9003 (biodegradable, recyclable, residual, special waste). Always follow your local ordinance.</li>
+  <li>Default schedule: Quezon City DSQC Citizen’s Charter 2025 (Mon/Wed/Fri biodegradable; Tue/Thu/Sat non-biodegradable).</li></ul></div>
+ <div class="card"><h2>Feedback</h2><p class="mut">Was the result helpful?</p>
+  <div class="row"><button class="g" onclick="fb('up')">👍 Yes</button><button class="g" onclick="fb('down')">👎 No</button></div><p class="mut" id="fbm"></p></div>
+</section>
+</main>
+<nav id="nav"></nav>
+<script>
+/* ===== CONFIG: plug in your own services here =====
+ IDENTIFY_API_URL: POST multipart "image" -> {item,category,reason,tip}
+ SCHEDULE_API_URL: GET ?city=&barangay= -> [{weekday:0-6,type}] and/or [{date:"YYYY-MM-DD",type}] */
+const CONFIG={IDENTIFY_API_URL:"",SCHEDULE_API_URL:"",CITY:"Quezon City"};
+
+const CATS={
+Biodegradable:{i:"🍃",c:"#3aa65b",do:["Put in the green (wet) bin; drain liquids.","Compost at home or bring to a barangay composting site or MRF.","Keep plastic, metal and glass out."],why:"Food scraps, peels, leaves and garden waste."},
+Recyclable:{i:"♻️",c:"#2d8fd6",do:["Rinse, dry, flatten cartons and crush bottles.","Separate paper, plastic, metal and glass.","Sell to a junk shop or drop at the barangay MRF."],why:"Paper, PET bottles, cans, glass, clean cardboard."},
+Reusable:{i:"🔁",c:"#8a5cd6",do:["Clean it and repair if you can.","Donate usable clothes, books, furniture or containers.","Repurpose jars, boxes and bags at home."],why:"Items still working or usable."},
+Residual:{i:"🗑️",c:"#6b7280",do:["Bag and tie it, then place in the general-waste (dry) bin.","Wrap sharp items such as broken glass.","Cut down on single-use items next time."],why:"Soiled wrappers, sachets, diapers, ceramics, cigarette butts."},
+"E-waste":{i:"🔌",c:"#e08a1e",do:["Never put in regular bins: it contains lead, mercury and other toxins.","Remove batteries and wipe personal data.","Sell or donate working items; take broken ones to a DENR-accredited e-waste collector or a store take-back bin."],why:"Phones, chargers, cables, batteries, appliances."},
+Hazardous:{i:"⚠️",c:"#d64545",do:["Keep sealed in the original container.","Never pour down drains or burn.","Ask your barangay or city hall about special-waste collection."],why:"Paint, chemicals, aerosols, bulbs, syringes."}};
+const names=Object.keys(CATS),$=id=>document.getElementById(id);
+const ld=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}};
+const sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const SHOPCATS=["Recyclable","E-waste","Reusable"];
+
+/* nav */
+const tabs=[["scan","📷","Scan"],["sched","📅","Schedule"],["shops","🏪","Shops"],["about","ℹ️","About"]];
+$("nav").innerHTML=tabs.map(t=>`<button data-t="${t[0]}" aria-selected="${t[0]==="scan"}"><span>${t[1]}</span>${t[2]}</button>`).join("");
+function show(t){tabs.forEach(x=>$("t-"+x[0]).classList.toggle("hide",x[0]!==t));document.querySelectorAll("nav button").forEach(b=>b.setAttribute("aria-selected",b.dataset.t===t));scrollTo(0,0)}
+$("nav").onclick=e=>{const b=e.target.closest("button");if(b)show(b.dataset.t)};
+
+/* result */
+$("cats").innerHTML=names.map(n=>`<button data-c="${n}">${CATS[n].i} ${n}</button>`).join("");
+$("cats").onclick=e=>{const b=e.target.closest("button");if(b)render(b.dataset.c,null)};
+function render(c,info){
+ const d=CATS[c];if(!d)return;
+ document.documentElement.style.setProperty("--c",d.c);
+ document.querySelectorAll("#cats button").forEach(b=>b.classList.toggle("on",b.dataset.c===c));
+ let h=`<div class="card res"><div class="row" style="align-items:center;flex-wrap:nowrap"><div class="big" style="flex:0 0 auto">${d.i}</div><div><span class="chip">${c}</span>`;
+ h+=info&&info.item?`<h2 style="margin:4px 0 0">${esc(info.item)}</h2><div class="mut">${esc(info.reason||"")}</div>`:`<div class="mut">${d.why}</div>`;
+ h+=`</div></div><h2 style="margin-top:14px">How to dispose of it</h2><ol>${d.do.map(x=>`<li>${x}</li>`).join("")}</ol>`;
+ if(info&&info.tip)h+=`<p><b>Tip:</b> ${esc(info.tip)}</p>`;
+ const w=whenFor(c);if(w)h+=`<p>📅 <b>${w}</b></p>`;
+ h+=`<p class="mut">Follow your local rules and barangay segregation policy.</p>`;
+ if(SHOPCATS.includes(c))h+=`<button class="g" onclick="goShops('${c}')">Where to sell or donate</button>`;
+ $("res").innerHTML=h+"</div>";$("res").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+/* auto-identify on upload */
+let sample=null;
+try{window.claude?.use("sample")?.then(s=>{sample=s;}).catch(()=>{})}catch(e){}
+const PROMPT="Identify the main waste item in this photo. Reply with ONLY JSON, no backticks: {\"item\":\"short name\",\"category\":\"one of "+names.join("|")+"\",\"reason\":\"one sentence why\",\"tip\":\"one practical tip, max 20 words\"}. Use Philippine RA 9003 segregation logic. If no waste is visible, set item to \"Not sure\" and category to Residual.";
+$("f").onchange=async e=>{
+ const f=e.target.files[0];if(!f)return;
+ let blob;
+ try{
+  const bmp=await createImageBitmap(f),k=Math.min(1,1024/Math.max(bmp.width,bmp.height));
+  const cv=document.createElement("canvas");cv.width=bmp.width*k;cv.height=bmp.height*k;
+  cv.getContext("2d").drawImage(bmp,0,0,cv.width,cv.height);
+  blob=await new Promise(r=>cv.toBlob(r,"image/jpeg",.8));
+ }catch(err){$("st").textContent="Couldn’t read that image. Try another one.";return}
+ $("pv").src=URL.createObjectURL(blob);$("pw").style.display="block";$("pw").classList.add("scan");$("res").innerHTML="";
+ $("st").textContent="Identifying your trash…";
+ try{
+  let j;
+  if(sample&&(await sample.limits()).images){
+   const r=await sample(PROMPT,{images:[blob],modelTier:"quick",cache:false});
+   j=JSON.parse(r.text.match(/\{[\s\S]*\}/)[0]);
+  }else if(CONFIG.IDENTIFY_API_URL){
+   const fd=new FormData();fd.append("image",blob,"photo.jpg");
+   j=await (await fetch(CONFIG.IDENTIFY_API_URL,{method:"POST",body:fd})).json();
+  }else{$("st").textContent="Automatic recognition needs a service (set IDENTIFY_API_URL). Please pick a category below.";$("pw").classList.remove("scan");return}
+  const c=names.find(n=>n.toLowerCase()===String(j.category).toLowerCase())||"Residual";
+  $("st").textContent="Done! Wrong result? Pick the right category below.";render(c,j);
+ }catch(err){$("st").textContent="Couldn’t identify it automatically. Please pick a category below."}
+ $("pw").classList.remove("scan");
+};
+
+/* schedule */
+const days=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const TYPES=["Biodegradable","Non-biodegradable"];
+const HINT={"Biodegradable":"food scraps, peelings, leaves","Non-biodegradable":"plastics, paper, cans, bottles, residual"};
+const ICON={"Biodegradable":"🍃","Non-biodegradable":"🛍️"};
+const QC=()=>({weekly:[1,3,5].map(d=>({d,t:"Biodegradable"})).concat([2,4,6].map(d=>({d,t:"Non-biodegradable"}))),dated:[],src:"Quezon City DSQC Citizen’s Charter 2025 (citywide default)"});
+let S=ld("sched2",null)||QC();
+$("sd").innerHTML=days.map((d,i)=>`<option value="${i}">${d}</option>`).join("");
+$("sty").innerHTML=TYPES.map(t=>`<option>${t}</option>`).join("");
+$("brgy").value=ld("brgy","");
+const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const addD=n=>{const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()+n);return d};
+const typesOn=d=>[...new Set(S.weekly.filter(x=>x.d===d.getDay()).map(x=>x.t).concat(S.dated.filter(x=>x.date===iso(d)).map(x=>x.type||x.t)))];
+const bucket=c=>c==="Biodegradable"?"Biodegradable":(["Recyclable","Residual","Reusable"].includes(c)?"Non-biodegradable":null);
+function whenFor(c){const b=bucket(c);if(!b)return"";for(let n=0;n<14;n++){const d=addD(n);if(typesOn(d).includes(b)){const l=n===0?"today":n===1?"tomorrow":d.toLocaleDateString(undefined,{weekday:"long",month:"short",day:"numeric"});return `Next ${b.toLowerCase()} collection: ${l}`}}return""}
+function drawSched(){
+ const t=typesOn(addD(0));
+ $("today").innerHTML=`<h2>Today · ${days[new Date().getDay()]}</h2>`+(t.length?`<div style="font-size:20px;font-weight:700">${t.map(x=>(ICON[x]||"🗑️")+" "+esc(x)).join(" + ")} collection</div><div class="mut">${t.map(x=>HINT[x]||"").filter(Boolean).join("; ")}</div>`:`<div style="font-size:18px;font-weight:700">No regular collection today</div>`);
+ let h="";for(let n=0;n<7;n++){const d=addD(n),ty=typesOn(d);
+  h+=`<div class="day"><div class="dt"><small>${d.toLocaleDateString(undefined,{weekday:"short"})}</small>${d.getDate()}</div><div>${ty.length?ty.map(x=>`<b>${ICON[x]||"🗑️"} ${esc(x)}</b><div class="mut">${HINT[x]||""}</div>`).join(""):`<span class="mut">No regular collection</span>`}</div></div>`}
+ $("week").innerHTML=h;$("src").textContent="Source: "+S.src;
+ $("slist").innerHTML=S.weekly.slice().sort((a,b)=>a.d-b.d).map((x,i)=>`<div class="row" style="align-items:center;margin:4px 0"><span style="flex:1 1 auto">${days[x.d]} · ${ICON[x.t]||""} ${esc(x.t)}</span><button class="g" style="flex:0 0 auto;min-height:36px;padding:4px 12px" onclick="delS(${x.d},'${x.t}')">✕</button></div>`).join("")}
+$("sadd").onclick=()=>{S.weekly.push({d:+$("sd").value,t:$("sty").value});S.src="Your custom schedule";sv("sched2",S);drawSched()};
+window.delS=(d,t)=>{S.weekly=S.weekly.filter(x=>!(x.d===d&&x.t===t));S.src="Your custom schedule";sv("sched2",S);drawSched()};
+$("reset").onclick=()=>{S=QC();sv("sched2",S);drawSched()};
+$("brgy").onchange=()=>sv("brgy",$("brgy").value.trim());
+$("sync").onclick=async()=>{
+ sv("brgy",$("brgy").value.trim());
+ if(!CONFIG.SCHEDULE_API_URL){$("sm").textContent="No schedule service connected yet. Set SCHEDULE_API_URL in the code, or edit the schedule by hand.";return}
+ $("sm").textContent="Syncing…";
+ try{
+  const u=CONFIG.SCHEDULE_API_URL+"?city="+encodeURIComponent(CONFIG.CITY)+"&barangay="+encodeURIComponent($("brgy").value.trim());
+  const j=await (await fetch(u)).json(),a=Array.isArray(j)?j:(j.schedule||[]);
+  S={weekly:a.filter(x=>x.weekday!=null).map(x=>({d:+x.weekday,t:x.type})),dated:a.filter(x=>x.date).map(x=>({date:x.date,type:x.type})),src:"Live schedule for "+($("brgy").value.trim()||CONFIG.CITY)+" (synced "+new Date().toLocaleDateString()+")"};
+  sv("sched2",S);drawSched();$("sm").textContent="Schedule updated.";
+ }catch(err){$("sm").textContent="Couldn’t reach the schedule service. Showing your saved schedule."}
+};
+
+/* shops */
+$("sc").innerHTML=SHOPCATS.map(t=>`<option>${t}</option>`).join("");
+$("sfil").innerHTML=`<option value="">All shops</option>`+SHOPCATS.map(t=>`<option>${t}</option>`).join("");
+$("maps").href="https://www.google.com/maps/search/"+encodeURIComponent("junk shop OR e-waste recycling near me");
+function drawShops(){
+ const f=$("sfil").value,s=ld("shops",[]).map((x,i)=>({...x,i})).filter(x=>!f||x.c===f);
+ $("shlist").innerHTML=s.length?s.map(x=>`<div class="card"><b>${esc(x.n)}</b> <span class="chip" style="--c:${CATS[x.c]?.c||"#2f9e5e"}">${esc(x.c)}</span><br><span class="mut">${esc(x.a||"No address")}</span><div class="row" style="margin-top:8px">${x.p?`<a class="btn" style="text-align:center;text-decoration:none" href="tel:${esc(x.p)}">📞 ${esc(x.p)}</a>`:""}<button class="g" onclick="delSh(${x.i})">Remove</button></div></div>`).join(""):`<p class="mut">No shops saved yet.</p>`}
+$("shadd").onclick=()=>{const n=$("sn").value.trim();if(!n)return;const s=ld("shops",[]);s.push({n,a:$("sa").value.trim(),p:$("sp").value.trim(),c:$("sc").value});sv("shops",s);["sn","sa","sp"].forEach(k=>$(k).value="");drawShops()};
+window.delSh=i=>{const s=ld("shops",[]);s.splice(i,1);sv("shops",s);drawShops()};
+$("sfil").onchange=drawShops;
+window.goShops=c=>{show("shops");$("sfil").value=SHOPCATS.includes(c)?c:"";drawShops()};
+window.fb=v=>{const f=ld("fb",{up:0,down:0});f[v]++;sv("fb",f);$("fbm").textContent="Thanks! Saved on this device."};
+drawSched();drawShops();
+</script></body></html>
